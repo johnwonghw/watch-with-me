@@ -8,11 +8,15 @@
     "server": "cd server && yarn start",
     "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
     "heroku-postbuild": "cd client && yarn && yarn run build",
-    "start": "node server/index.js"
+    "start": "cd server && yarn && yarn start"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^4.1.0"
+  },
+  "engines": {
+    "node": "10.3.0",
+    "yarn": "1.12.3"
   }
 }
