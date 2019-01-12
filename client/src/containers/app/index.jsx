@@ -14,42 +14,65 @@ class App extends Component {
       peerId: '',
       message: '',
       messageList: [],
+      isConnected: false,
+      videoSource: '',
     }
-    
-    this.peer1 = new SimplePeer({
-      initiator: window.location.hash === '#init',
-      trickle: false
-    });
-    this.peer2 = new SimplePeer();
+
   }
-
+  
   componentDidMount() {
-    this.peer1.on('signal', (data) => {
-      console.log('SIGNAL peer1', JSON.stringify(data))
-      this.setState({ myId: JSON.stringify(data) })
-    })
+    navigator.getUserMedia({ video: true, audio: true }, (stream) => {
 
-    this.peer1.on('connect', (data) => {
-      console.log('CONNECTED YESSS!')
-      this.peer1.send('HELLO ITS ME FROM THE FUTURE')
-    })
+      this.peer1 = new SimplePeer({
+        initiator: window.location.hash === '#init',
+        trickle: false,
+        stream
+      });
+      this.peer2 = new SimplePeer({ 
+        stream 
+      });
 
-    this.peer1.on('data', (data) => {
-      let dec = new TextDecoder("utf-8")
-      console.log('RECEIVED DATA1', dec.decode(data))
-      this.addMessage('peer', dec.decode(data))
-    })
+      this.peer1.on('signal', (data) => {
+        console.log('SIGNAL peer1', JSON.stringify(data))
+        this.setState({ myId: JSON.stringify(data) })
+      })
+  
+      this.peer1.on('connect', (data) => {
+        console.log('CONNECTED YESSS!')
+        this.peer1.send('HELLO ITS ME FROM THE FUTURE')
+        this.setState({ isConnected: true })
+      })
+  
+      this.peer1.on('data', (data) => {
+        let dec = new TextDecoder("utf-8")
+        console.log('RECEIVED DATA1', dec.decode(data))
+        this.addMessage('peer', dec.decode(data))
+      })
+  
+      this.peer2.on('data', (data) => {
+        let dec = new TextDecoder("utf-8")
+        console.log('RECEIVED DATA2', dec.decode(data))
+        this.addMessage('peer', dec.decode(data))
+      })
+  
+      this.peer2.on('signal', (data) => {
+        console.log('SIGNAL peer2', JSON.stringify(data))
+        this.setState({ myId: JSON.stringify(data) })
+      })
 
-    this.peer2.on('data', (data) => {
-      let dec = new TextDecoder("utf-8")
-      console.log('RECEIVED DATA2', dec.decode(data))
-      this.addMessage('peer', dec.decode(data))
-    })
+      this.peer1.on('stream', (data) => {
+        this.setState({ videoSource: window.URL.createObjectURL(data) }, () => {
+          this.refs['video-dom'].play()
+        })    
+      })
 
-    this.peer2.on('signal', (data) => {
-      console.log('SIGNAL peer2', JSON.stringify(data))
-      this.setState({ myId: JSON.stringify(data) })
-    })
+      this.peer2.on('stream', (data) => {
+        this.setState({ videoSource: window.URL.createObjectURL(data) }, () => {
+          this.refs['video-dom'].play()
+        })
+      })
+    }, function () {})
+
   }
 
   addMessage = (author, text) => {
@@ -62,9 +85,21 @@ class App extends Component {
     })
   }
 
+  sendMessage = () => {
+    let { message, isConnected } = this.state;
+    if (message && isConnected) {
+      if (window.location.hash === '#init') {
+        this.peer1.send(message)
+      } else {
+        this.peer2.send(message)
+      }
+      this.addMessage('me', message)
+    }
+  }
+
   render() {
-    let { myId, peerId, message, messageList } = this.state;
-    console.log(this.state.messageList)
+    let { myId, peerId, message, messageList, videoSource } = this.state;
+
     return (
       <div className="App">
 
@@ -90,17 +125,14 @@ class App extends Component {
         <textarea
           value={message}
           onChange={(e) => { this.setState({ message: e.target.value }) }}
-        />
-        <div onClick={() => {
-          if (message) {
-            if (window.location.hash === '#init') {
-              this.peer1.send(message)
-            } else {
-              this.peer2.send(message)
+          onKeyPress={(e) => {
+            console.log(e.key)
+            if (e.key === 'Enter') {
+              this.sendMessage()
             }
-            this.addMessage('me', message)
-          }
-        }}>send</div>
+          }}
+        />
+        <div onClick={this.sendMessage}>send</div>
 
         <div className="message-container">
           {messageList.map((currMessage) => {
@@ -109,6 +141,11 @@ class App extends Component {
             )
           })}
         </div>
+
+        <video src={videoSource} ref="video-dom" ></video>
+        <button onClick={() => {
+          this.refs['video-dom'].play()
+        }}>PLAY</button>
 
         {/* <div className="media-container">
           <VideoPlayer
