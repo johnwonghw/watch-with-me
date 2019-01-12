@@ -8,7 +8,7 @@
     "server": "cd server && yarn start",
     "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
     "heroku-postbuild": "cd client && yarn && yarn run build",
-    "start": "cd server && yarn && yarn start"
+    "start": "yarn && cd server && yarn && node index.js"
   },
   "author": "",
   "license": "ISC",
