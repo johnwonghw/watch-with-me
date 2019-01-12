@@ -1,0 +1,13 @@
+.message-container {
+  width: 500px;
+  border: 1px solid #eee;
+  .message {
+    padding: 5px;
+  }
+  .my-message {
+    text-align: right;
+  }
+  .peer-message {
+    text-align: left;
+  }
+}
