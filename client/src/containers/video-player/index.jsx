@@ -1,125 +1,91 @@
 import React, { Component } from 'react';
-import _ from 'lodash';
+import ReactPlayer from 'react-player'
 import { FaPlay, FaPause } from 'react-icons/fa';
 
 import './_video-player.scss';
 
 class VideoPlayer extends Component {
   constructor(props) {
-    super(props);
-    this.state = {
-      playerState: {}
-    }
-    this.init();
-    this.video = 'yY6XnbWnK4o' //video id
-    window['onYouTubeIframeAPIReady'] = (e) => {
-      this.YT = window['YT'];
-      this.reframed = false;
-      this.player = new window['YT'].Player('player', {
-        videoId: this.video,
-        // height: '100%',
-        // width: '100%',  
-        events: {
-          'onStateChange': this.onPlayerStateChange.bind(this),
-          'onError': this.onPlayerError.bind(this),
-          'onReady': (e) => {
-            if (!this.reframed) {
-              this.reframed = true;
-              // reframe(e.target.a);
-            }
-          }
-        },
-        modestbranding: 1,
+    super(props)
 
-        playerVars: {
-          controls: 0,
-          enablejsapi: 1,
-          // modestbranding: true,
-        },
-      });
-    };
+    this.state = {
+      isReady: false,
+      playing: false,
+      showControls: false,
+    }
   }
 
-  handlePlayClick = () => {
-    console.log('click')
-    if (this.state.playerState.data == 1) {
-      this.player.pauseVideo();
-    } else if (this.state.playerState.data == 2) {
-      this.player.playVideo();
+  handleOnReady = () => {
+    this.setState({ isReady: true })
+  }
+
+  // handleOnPlay = () => {
+  //   this.setState({ status: 'playing' })
+  // }
+
+  // handleOnPause = () => {
+  //   this.setState({ status: 'paused' })
+  // }
+
+  getPlayPauseBtn = () => {
+    let { playing } = this.state;
+    let click = () => {this.setState({ playing: !playing })}
+    if (playing) {
+      return (
+        <FaPause color="white" onClick={click} />
+      )
+    } else {
+      return <FaPlay color="white" onClick={click} />
     }
+  }
+
+  handleMouseMove = () => {
+    console.log('asf')
+    // this.setState({ showControls: true })
+
+    // let fadeOutTimeout = setTimeout(() => {
+    //   this.setState({ showControls: false})
+    // }, 3000);
   }
 
   render() {
-    return (
-      <div className="video-player-container">
-        <div className="youtube-player">
-          <div className="embed-responsive embed-responsive-16by9" id="player">
-          </div>
-        </div>
-        <div
-          className="video-controls-container"
-          onMouseEnter={() => {console.log('mouse-enter')}}
-          onMouseLeave={() => {console.log('mouse-leave')}}
-          onMouseMove={() => {console.log('mouse-move')}}
-        >
-          <div
-            className="play-pause-btn-wrapper"
-            onClick={this.handlePlayClick}
-          >
-            {this.state.playerState.data == 1 ? <FaPause /> : <FaPlay />}
+    let {
+      url,
+    } = this.props;
 
+    let {
+      playing,
+      showControls
+    } = this.state;
+
+    return (
+      <div
+        className="video-player-container"
+        onMouseEnter={() => {this.setState({ showControls: true})}}
+        onMouseLeave={() => {this.setState({ showControls: false})}}
+      >
+        <div className="player-wrapper"
+>
+          <ReactPlayer
+            url={url}
+            className="react-player"
+            width='100%'
+            height='100%'
+            onReady={this.handleOnReady}
+            onPlay={this.handleOnPlay}
+            onPause={this.handleOnPause}
+            playing={playing}
+          />
+        </div>
+        <div className={`controls-wrapper ${showControls ? '' : 'hide'}`}>
+          {this.state.status}
+          <div className="play-pause-btn-wrapper">
+            {this.getPlayPauseBtn()}
           </div>
         </div>
       </div>
     );
   }
-
-  init() {
-    var tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    var firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-  }
-
-  onPlayerStateChange(event) {
-    console.log(event)
-    this.setState({
-      playerState: _.cloneDeep(event)
-    })
-    switch (event.data) {
-      case window['YT'].PlayerState.PLAYING:
-        if (this.cleanTime() == 0) {
-          console.log('started ' + this.cleanTime());
-        } else {
-          console.log('playing ' + this.cleanTime())
-        };
-        break;
-      case window['YT'].PlayerState.PAUSED:
-        if (this.player.getDuration() - this.player.getCurrentTime() != 0) {
-          console.log('paused' + ' @ ' + this.cleanTime());
-        };
-        break;
-      case window['YT'].PlayerState.ENDED:
-        console.log('ended ');
-        break;
-
-    };
-  };
-  //utility
-  cleanTime() {
-    return Math.round(this.player.getCurrentTime())
-  };
-  onPlayerError(event) {
-    switch (event.data) {
-      case 2:
-        console.log('' + this.video)
-        break;
-      case 100:
-        break;
-      case 101 || 150:
-        break;
-    };
-  };
 }
 
 export default VideoPlayer;

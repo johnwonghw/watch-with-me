@@ -1,28 +1,32 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
-import VideoPlayer from 'containers/video-player'
+import VideoPlayer from 'containers/video-player';
+import ReactPlayer from 'react-player'
+
+import SimplePeer from 'simple-peer';
 import './_app.scss';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      myId: '',
+      peerId: '',
+    }
+  }
   render() {
+    let { myId, peerId } = this.state;
     return (
       <div className="App">
-        {/* <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header> */}
+
+        <textarea
+          value={myId}
+        />
         <div className="media-container">
-          <VideoPlayer />
+          <VideoPlayer 
+            url="https://www.youtube.com/watch?v=xszeN3CVxk4"
+          />
           <div>asdf</div>
         </div>
       </div>
