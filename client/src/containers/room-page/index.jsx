@@ -23,12 +23,12 @@ class RoomPage extends Component {
       messageValue: '',
       messageList: [],
       
-      
+
     }
   }
 
   componentDidMount() {
-    console.log('welcome to room: ', this.props.match.params.roomId)
+    console.log('welcome to the room: ', this.props.match.params.roomId)
     this.initSocket()
   }
 
