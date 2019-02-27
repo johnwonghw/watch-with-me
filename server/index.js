@@ -5,7 +5,7 @@ const path = require('path');
 const port = process.env.PORT || 4300;
 
 const server = require('http').createServer(app);
-const io = require('socket.io')(server, { origins: '*:*'});
+const io = require('socket.io')(server, { origins: '*:*' });
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -45,43 +45,71 @@ app.post('/api/world', (req, res) => {
   );
 });
 
-io.on('connection', (socket) =>{
+io.on('connection', (socket) => {
   console.log('a user is connected', socket.id)
+  socket.on('join-room', (data) => {
+    let roomId = data.roomId
+    if (roomId) {
+      socket.join(roomId);
 
+      io.to(roomId).emit('update-room-data', {
+        roomClientCount: Object.keys(io.sockets.adapter.rooms[roomId].sockets).length
+      });
+
+      let peerSocketList = [];
+      let roomClientsId = Object.keys(io.sockets.adapter.rooms[roomId].sockets)
+      console.log({roomClientsId})
+      roomClientsId.forEach((peerKey) => {
+        if (socket.id !== peerKey) {
+          peerSocketList.push(io.sockets.connected[peerKey])
+        }
+      })
+
+      peerSocketList.forEach((peerSocket) => {
+        peerSocket.emit('peer', {
+          peerId: socket.id,
+          initiator: true
+        })
+        socket.emit('peer', {
+          peerId: peerSocket.id,
+          initiator: false
+        })
+      })
+
+      socket.on('signal', (data) => {
+        let socket2 = io.sockets.connected[data.peerId];
+        if (!socket2) { return; }
+
+        socket2.emit('signal', {
+          signal: data.signal,
+          peerId: socket.id
+        });
+      });
+
+      socket.on('pend-video', (data) => {
+        let { videoSrc } = data;
+        
+        io.to(roomId).emit('update-video', {
+          videoSrc
+        });
+      })
+
+
+      socket.on('disconnect', () => {
+        if (io.sockets.adapter.rooms && io.sockets.adapter.rooms[roomId]) {
+          io.to(roomId).emit('update-room-data', {
+            roomClientCount: Object.keys(io.sockets.adapter.rooms[roomId].sockets).length
+          });
+        }
+      })
+    }
+  })
   // socket.on('dataa', (word) => {
   //   console.log('received data: ', word)
   // })
   // socket.on('disconnect', () => {
   //   console.log('user disconnected')
   // })
-
-  let peerSocketList = [];
-  Object.keys(io.sockets.connected).forEach((peerKey) => {
-    if (socket.id !== peerKey) {
-      peerSocketList.push(io.sockets.connected[peerKey])
-    }
-  })
-
-  peerSocketList.forEach((peerSocket) => {
-    peerSocket.emit('peer', {
-      peerId: socket.id,
-      initiator: true
-    })
-    socket.emit('peer', {
-      peerId: peerSocket.id,
-      initiator: false
-    })
-  })
-
-  socket.on('signal', (data) => {
-    let socket2 = io.sockets.connected[data.peerId];
-    if (!socket2) { return; }
-
-    socket2.emit('signal', {
-      signal: data.signal,
-      peerId: socket.id
-    });
-  });
 
 })
 

@@ -10,7 +10,7 @@ class VideoPlayer extends Component {
 
     this.state = {
       isReady: false,
-      playing: false,
+      // playing: false,
       showControls: false,
     }
   }
@@ -28,8 +28,11 @@ class VideoPlayer extends Component {
   // }
 
   getPlayPauseBtn = () => {
-    let { playing } = this.state;
-    let click = () => {this.setState({ playing: !playing })}
+    let { playing } = this.props;
+    let click = () => {
+      this.props.handleClickPlay();
+      // this.setState({ playing: !playing }) 
+    }
     if (playing) {
       return (
         <FaPause color="white" onClick={click} />
@@ -51,21 +54,20 @@ class VideoPlayer extends Component {
   render() {
     let {
       url,
+      playing,
     } = this.props;
 
     let {
-      playing,
       showControls
     } = this.state;
 
     return (
       <div
         className="video-player-container"
-        onMouseEnter={() => {this.setState({ showControls: true})}}
-        onMouseLeave={() => {this.setState({ showControls: false})}}
+        onMouseEnter={() => { this.setState({ showControls: true }) }}
+        onMouseLeave={() => { this.setState({ showControls: false }) }}
       >
-        <div className="player-wrapper"
->
+        <div className="player-wrapper">
           <ReactPlayer
             url={url}
             className="react-player"
