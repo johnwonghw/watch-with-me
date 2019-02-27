@@ -34,7 +34,8 @@ class RoomPage extends Component {
 
   initSocket = () => {
     let roomId = this.props.match.params.roomId;
-    this.socket = socketIOClient('localhost:4300');
+    let socketUrl = process.env.NODE_ENV === 'production' ? 'https://watch-with-me2.herokuapp.com:4300' : 'localhost:4300'
+    this.socket = socketIOClient(socketUrl);
     this.socket.on('connect', () => {
       this.socket.emit('join-room', {
         roomId,
