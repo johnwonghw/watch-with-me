@@ -31,88 +31,88 @@ class RoomPage extends Component {
 
   componentDidMount() {
     console.log('welcome to the room: ', this.props.match.params.roomId)
-    // this.initSocket()
+    this.initSocket()
   }
 
-  // initSocket = () => {
-  //   let roomId = this.props.match.params.roomId;
-  //   if (process.env.NODE_ENV === 'production') {
-  //     this.socket = socketIOClient();
-  //   } else {
-  //     this.socket = socketIOClient('localhost:4300');
-  //   }
-  //   this.socket.on('connect', () => {
-  //     this.socket.emit('join-room', {
-  //       roomId,
-  //     })
+  initSocket = () => {
+    let roomId = this.props.match.params.roomId;
+    if (process.env.NODE_ENV === 'production') {
+      this.socket = socketIOClient();
+    } else {
+      this.socket = socketIOClient('localhost:4300');
+    }
+    this.socket.on('connect', () => {
+      this.socket.emit('join-room', {
+        roomId,
+      })
 
-  //     this.socket.on('update-room-data', (data) => {
-  //       let {
-  //         roomClientCount
-  //       } = data;
-  //       this.setState({
-  //         connections: roomClientCount,
-  //         isLeader: this.state.isLeader || roomClientCount === 1 ? true : false
-  //       })
-  //     })
+      this.socket.on('update-room-data', (data) => {
+        let {
+          roomClientCount
+        } = data;
+        this.setState({
+          connections: roomClientCount,
+          isLeader: this.state.isLeader || roomClientCount === 1 ? true : false
+        })
+      })
 
 
 
-  //     this.socket.on('peer', (data) => {
-  //       let peerId = data.peerId;
-  //       this.peer = new SimplePeer({ initiator: data.initiator, trickle: false, });
+      this.socket.on('peer', (data) => {
+        let peerId = data.peerId;
+        this.peer = new SimplePeer({ initiator: data.initiator, trickle: false, });
 
-  //       this.socket.on('signal', (data) => {
-  //         if (data.peerId == peerId) {
-  //           console.log('happening')
-  //           this.peer.signal(data.signal);
-  //         }
-  //       })
+        this.socket.on('signal', (data) => {
+          if (data.peerId == peerId) {
+            console.log('happening')
+            this.peer.signal(data.signal);
+          }
+        })
 
-  //       this.peer.on('signal', (data) => {
-  //         this.socket.emit('signal', {
-  //           signal: data,
-  //           peerId
-  //         })
-  //       })
+        this.peer.on('signal', (data) => {
+          this.socket.emit('signal', {
+            signal: data,
+            peerId
+          })
+        })
 
-  //       this.peer.on('connect', () => {
-  //         console.log('Peer connection established');
-  //         this.peer.send(JSON.stringify({
-  //           type: "log",
-  //           value: "hi my peers"
-  //         }));
-  //       });
+        this.peer.on('connect', () => {
+          console.log('Peer connection established');
+          this.peer.send(JSON.stringify({
+            type: "log",
+            value: "hi my peers"
+          }));
+        });
 
-  //       this.peer.on('data', (data) => {
-  //         console.log('rtc received data: ', data)
-  //         let dec = new TextDecoder("utf-8")
-  //         let parsedData = JSON.parse(dec.decode(data))
-  //         let { type, playing, message } = parsedData;
-  //         // let { playing } = data;
-  //         if (type === 'video-action') {
-  //           this.setState({ playing })
-  //         } else if (type === 'message') {
-  //           this.setState({ messageList: [...this.state.messageList, message] })
-  //         } else if (type === 'log') {
-  //           console.log('rtc log: ', parsedData.value)
-  //         }
-  //       })
+        this.peer.on('data', (data) => {
+          console.log('rtc received data: ', data)
+          let dec = new TextDecoder("utf-8")
+          let parsedData = JSON.parse(dec.decode(data))
+          let { type, playing, message } = parsedData;
+          // let { playing } = data;
+          if (type === 'video-action') {
+            this.setState({ playing })
+          } else if (type === 'message') {
+            this.setState({ messageList: [...this.state.messageList, message] })
+          } else if (type === 'log') {
+            console.log('rtc log: ', parsedData.value)
+          }
+        })
 
-  //     })
+      })
 
-  //     this.socket.on('update-video', (data) => {
-  //       let { videoSrc } = data;
-  //       this.setState({
-  //         currVideo: videoSrc
-  //       })
-  //     })
+      this.socket.on('update-video', (data) => {
+        let { videoSrc } = data;
+        this.setState({
+          currVideo: videoSrc
+        })
+      })
 
-  //     this.socket.on('log', (data) => {
-  //       console.log('logging: ', data)
-  //     })
-  //   })
-  // }
+      this.socket.on('log', (data) => {
+        console.log('logging: ', data)
+      })
+    })
+  }
 
   changeVid = () => {
     let { videoValue } = this.state;
