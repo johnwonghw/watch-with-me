@@ -6,7 +6,7 @@ export default function socketMiddleware() {
   if (process.env.NODE_ENV === 'production') {
     socket = io();
   } else {
-    socket = io('localhost:8080', {
+    socket = io('localhost:4300', {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,

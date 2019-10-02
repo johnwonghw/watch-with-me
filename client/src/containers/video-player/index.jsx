@@ -69,10 +69,11 @@ class VideoPlayer extends Component {
       >
         <div className="player-wrapper">
           <ReactPlayer
-            url={url}
+            url={'https://www.youtube.com/watch?v=yXrlhebkpIQ'}
             className="react-player"
             width='100%'
             height='100%'
+            controls={false}
             onReady={this.handleOnReady}
             onPlay={this.handleOnPlay}
             onPause={this.handleOnPause}
