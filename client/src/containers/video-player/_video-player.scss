@@ -24,11 +24,37 @@
     width: 100%;
     color: white;
     padding: 14px 10px;
+    box-sizing: border-box;
     opacity: 1;
+    display: flex;
     &.hide {
       // opacity: 0;
       animation: 1s 1s forwards fadingOut;
       // animation-delay: 3s;
+    }
+    .play-pause-btn-wrapper {
+      display: flex;
+      align-items: center;
+      margin: 0 15px;
+    }
+    .time-seeker-wrapper {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      .time-seeker-bar {
+        flex: 1;
+        background: white;
+        height: 7px;
+        .time-seeker-bar-played {
+          height: 100%;
+          background: black;
+        }
+      }
+      .time-seeker-time {
+        width: 85px;
+        margin: 0 15px;
+        text-align: right;
+      }
     }
   }
 }
