@@ -122,7 +122,7 @@ class RoomPage extends Component {
     })
   }
 
-  handleClickPlay = () => {
+  handleVideoAction = () => {
     this.peer.send(JSON.stringify({
       type: 'video-action',
       playing: !this.state.playing
@@ -185,7 +185,7 @@ class RoomPage extends Component {
         <div>
           <VieoPlayer
             url={this.state.currVideo}
-            handleClickPlay={this.handleClickPlay}
+            handleVideoAction={this.handleVideoAction}
             playing={this.state.playing}
           />
         </div>
