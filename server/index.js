@@ -58,42 +58,39 @@ io.on('connection', (socket) => {
 
       let peerSocketList = [];
       let roomClientsId = Object.keys(io.sockets.adapter.rooms[roomId].sockets)
-      console.log({roomClientsId})
+      console.log({ roomClientsId })
       roomClientsId.forEach((peerKey) => {
         if (socket.id !== peerKey) {
           peerSocketList.push(io.sockets.connected[peerKey])
         }
       })
 
-      peerSocketList.forEach((peerSocket) => {
-        peerSocket.emit('peer', {
-          peerId: socket.id,
-          initiator: true
-        })
-        socket.emit('peer', {
-          peerId: peerSocket.id,
-          initiator: false
-        })
-      })
-
-      socket.on('signal', (data) => {
-        let socket2 = io.sockets.connected[data.peerId];
-        if (!socket2) { return; }
-
-        socket2.emit('signal', {
-          signal: data.signal,
-          peerId: socket.id
-        });
-      });
-
       socket.on('pend-video', (data) => {
         let { videoSrc } = data;
-        
+
         io.to(roomId).emit('update-video', {
           videoSrc
         });
       })
 
+      socket.on('room-message', (data) => {
+        socket.broadcast.to(roomId).emit('message', {
+          username: data.username,
+          text: data.text
+        })
+      })
+
+      socket.on('play-video', (data) => {
+        io.to(roomId).emit('play-video');
+      })
+      socket.on('pause-video', (data) => {
+        io.to(roomId).emit('pause-video');
+      })
+      socket.on('seek-video', (data) => {
+        io.to(roomId).emit('seek-video', {
+          played: data.played
+        });
+      })
 
       socket.on('disconnect', () => {
         if (io.sockets.adapter.rooms && io.sockets.adapter.rooms[roomId]) {
@@ -104,13 +101,6 @@ io.on('connection', (socket) => {
       })
     }
   })
-  // socket.on('dataa', (word) => {
-  //   console.log('received data: ', word)
-  // })
-  // socket.on('disconnect', () => {
-  //   console.log('user disconnected')
-  // })
-
 })
 
 
